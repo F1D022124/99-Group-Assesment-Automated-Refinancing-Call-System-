@@ -1,0 +1,558 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c97913ca-acc5-4832-beb5-165d27f1ceea",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1cjkXJbnEbzqMDKh38dN044XhlZKB8bxjzDyWBbYIVjM",
+          "mode": "list",
+          "cachedResultName": "Group99_Customer_Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cjkXJbnEbzqMDKh38dN044XhlZKB8bxjzDyWBbYIVjM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 212693418,
+          "mode": "list",
+          "cachedResultName": "Mortgage Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cjkXJbnEbzqMDKh38dN044XhlZKB8bxjzDyWBbYIVjM/edit#gid=212693418"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "a3534503-0732-40fb-9eb7-7395ef6aec05",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2YJ2HeeMQ6hOkMMK",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "24e7cbe9-5a7a-4591-8cf8-ec315efb99fa",
+              "leftValue": "={{parseFloat($json[\"Interest Rate\"].replace(\"%\",\"\"))}}",
+              "rightValue": 8,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "c52b209e-9762-4f2a-ae6d-1f849d130585",
+              "leftValue": "={{parseInt($json[\"Remaining Tenor (Years)\"])}}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "f7ff6b80-9ee5-4fbb-a362-f3d60887528c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.bland.ai/v1/calls",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "org_0fa75ac76493754e4becefc02d97bff446858fa115d9581b0a866fd3cf019623e9089bc65c9a9c44f7f669"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={  \n  \"phone_number\": \"+6285333883776\",  \n  \"pathway_id\": \"5768f991-6c1d-45c1-838b-df12b25b7afd\",  \n  \"request_data\": {  \n    \"name\": \"{{$json.Name}}\",  \n    \"bank\": \"{{$json.Bank}}\",  \n    \"interest_rate\": \"{{$json['Interest Rate']}}\",  \n    \"remaining_tenor\": \"{{$json['Remaining Tenor (Years)']}}\"  \n  }  \n}  ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        832,
+        -528
+      ],
+      "id": "97ca073e-edd6-40f4-a081-e7cfa07a03d6",
+      "name": "HTTP Request",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "226f2cdf-3fe5-433b-b99f-2547301f27a1",
+              "name": "Name",
+              "value": "={{ $json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "06f5076c-e663-4383-b225-e7b32f5b1147",
+              "name": "Phone",
+              "value": "={{ $json.Phone }}",
+              "type": "number"
+            },
+            {
+              "id": "9ad143c8-2ebf-4e66-87ec-5661bb96c00b",
+              "name": "Bank",
+              "value": "={{ $json.Bank }}",
+              "type": "string"
+            },
+            {
+              "id": "13383f83-3d0f-424d-9352-a6b2e104b996",
+              "name": "Interest Rate",
+              "value": "={{ $json['Interest Rate'] }}",
+              "type": "string"
+            },
+            {
+              "id": "fe8b312b-1569-4a9d-a212-6990199d4ae2",
+              "name": "Remaining Tenor (Years)",
+              "value": "={{ $json['Remaining Tenor (Years)'] }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        720,
+        -80
+      ],
+      "id": "2d2d4ff9-ed4c-43ee-ad93-63d1a64e94c5",
+      "name": "Prepare Customer Data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8d5386f0-7189-43b2-878d-0947fb038dff",
+              "name": "ai_agent",
+              "value": "Bland AI (Simulation)",
+              "type": "string"
+            },
+            {
+              "id": "672f3fb2-e0c2-40e5-8f3e-f8f471fa45dc",
+              "name": "call_status",
+              "value": "Completed",
+              "type": "string"
+            },
+            {
+              "id": "962b8d0c-588c-4d92-be0b-37e017194381",
+              "name": "customer_response",
+              "value": "Interested",
+              "type": "string"
+            },
+            {
+              "id": "b819742a-14dc-4d3c-b9cb-1a7af110b645",
+              "name": "call_summary",
+              "value": "Customer confirmed having an active mortgage and expressed interest in refinancing to obtain a lower interest rate and lower monthly payment.",
+              "type": "string"
+            },
+            {
+              "id": "c6fb4cf4-a48c-442d-ad3f-f31301b769c7",
+              "name": "recommendation",
+              "value": "Proceed to refinancing consultation.",
+              "type": "string"
+            },
+            {
+              "id": "11aefad9-06b3-4329-8607-40f41607265d",
+              "name": "next_action",
+              "value": "Sales Team Follow Up",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        944,
+        -80
+      ],
+      "id": "165c9ce8-8b4c-4018-bf0e-31a39d5c6536",
+      "name": "AI Call Simulation"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bd148ff4-a8ed-4d6c-a163-190edb82d0a1",
+              "name": "ai_agent",
+              "value": "Bland AI (Simulation)",
+              "type": "string"
+            },
+            {
+              "id": "85392d3e-1a41-42bc-a558-efb0abe842f4",
+              "name": "call_status",
+              "value": "Not Eligible",
+              "type": "string"
+            },
+            {
+              "id": "da054208-64ec-4e5a-928e-c1255c86e7e1",
+              "name": "customer_response",
+              "value": "Not Eligible for Refinancing",
+              "type": "string"
+            },
+            {
+              "id": "f8801875-7689-4c81-b237-e6423706c14b",
+              "name": "call_summary",
+              "value": "Customer does not meet the refinancing eligibility criteria based on the current mortgage information.",
+              "type": "string"
+            },
+            {
+              "id": "b2544319-e1fd-40a0-b112-01e0348c7299",
+              "name": "recommendation",
+              "value": "No refinancing recommendation.",
+              "type": "string"
+            },
+            {
+              "id": "54931c79-8f46-4811-8c71-d7b51d3a3598",
+              "name": "next_action",
+              "value": "No Action Required",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        96
+      ],
+      "id": "c4e8c104-75a3-41c5-933a-237aeb313b59",
+      "name": "Not Eligible Customer"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1cjkXJbnEbzqMDKh38dN044XhlZKB8bxjzDyWBbYIVjM",
+          "mode": "list",
+          "cachedResultName": "Group99_Customer_Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cjkXJbnEbzqMDKh38dN044XhlZKB8bxjzDyWBbYIVjM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 544531850,
+          "mode": "list",
+          "cachedResultName": "Refinancing Results",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cjkXJbnEbzqMDKh38dN044XhlZKB8bxjzDyWBbYIVjM/edit#gid=544531850"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{$now}}",
+            "Name": "={{ $('Get row(s) in sheet').item.json.Name }}",
+            "Phone": "={{ $('Get row(s) in sheet').item.json.Phone }}",
+            "Interest Rate": "={{ $('Get row(s) in sheet').item.json['Interest Rate'] }}",
+            "Bank": "={{ $('Get row(s) in sheet').item.json.Bank }}",
+            "Remaining Tenor": "={{ $('Get row(s) in sheet').item.json['Remaining Tenor (Years)'] }}",
+            "AI Agent": "={{ $json.ai_agent }}",
+            "Call Status": "={{ $json.call_status }}",
+            "Customer Response": "={{ $json.customer_response }}",
+            "Recommendation": "={{ $json.recommendation }}",
+            "Next Action": "={{ $json.next_action }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Bank",
+              "displayName": "Bank",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Interest Rate",
+              "displayName": "Interest Rate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Remaining Tenor",
+              "displayName": "Remaining Tenor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Agent",
+              "displayName": "AI Agent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Call Status",
+              "displayName": "Call Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Customer Response",
+              "displayName": "Customer Response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Recommendation",
+              "displayName": "Recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Next Action",
+              "displayName": "Next Action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1168,
+        -80
+      ],
+      "id": "979c11ba-9042-436f-8221-89074a26275e",
+      "name": "Save Refinancing Result",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2YJ2HeeMQ6hOkMMK",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "vinayaanindya33@gmail.com",
+        "subject": "New Mortgage Refinancing Lead",
+        "message": "=<h3>New Mortgage Refinancing Lead</h3>  <p><b>Name:</b> {{$json.Name}}</p> <p><b>Phone:</b> {{$json.Phone}}</p> <p><b>Bank:</b> {{$json.Bank}}</p> <p><b>Interest Rate:</b> {{$json[\"Interest Rate\"]}}</p> <p><b>Remaining Tenor:</b> {{ $json['Remaining Tenor'] }} years</p>  <hr>  <p><b>AI Recommendation:</b> {{ $json.Recommendation }}</p>  <p><b>Next Action:</b>{{ $json['Next Action'] }} </p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1392,
+        -80
+      ],
+      "id": "61317421-9f92-4767-83d9-2f4bbfb4a47b",
+      "name": "Notify Sales Team",
+      "webhookId": "c0558ae9-5c53-4e2b-8e0c-008da8bc7c22",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bjvMaDQ75Lq0Vgmf",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Prepare Customer Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Not Eligible Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Customer Data": {
+      "main": [
+        [
+          {
+            "node": "AI Call Simulation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Call Simulation": {
+      "main": [
+        [
+          {
+            "node": "Save Refinancing Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Refinancing Result": {
+      "main": [
+        [
+          {
+            "node": "Notify Sales Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Not Eligible Customer": {
+      "main": [
+        [
+          {
+            "node": "Save Refinancing Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Sales Team": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "09723dec-ed05-4903-a4bb-e349d590e793",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8498bd6a107e8bfc3197518a71617cc8d57e6d06126c9994cbf8941b55dd6061"
+  },
+  "nodeGroups": [],
+  "id": "6TYLtSmp5ZIdGYe3",
+  "tags": []
+}
